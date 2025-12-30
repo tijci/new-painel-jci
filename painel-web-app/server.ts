@@ -5,7 +5,7 @@ import next from "next";
 import { Server } from "socket.io";
 
 const dev = process.env.NODE_ENV !== "production";
-const hostname = "localhost";
+const hostname = "192.168.15.138";
 const port = 3000;
 
 const app = next({ dev, hostname, port });

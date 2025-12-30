@@ -19,10 +19,7 @@ export default function PainelTV() {
     socket.on("exibir_anuncio", (data) => {
       console.log("Recebi dados: ", data);
       setAnuncio(data);
-      setTimeout(() => {
-        console.log("Timer acabou")
-        setAnuncio(null);
-      }, 10000);
+
     });
 
     const carregarHistorico = async () => {
@@ -44,7 +41,16 @@ export default function PainelTV() {
       socket.disconnect();
     }
   }, [])
-
+  useEffect(() => {
+    if (anuncio) {
+      console.log("Anuncio exibido, iniciando timer de 10s...");
+      const timer = setTimeout(() => {
+        console.log("Timer acabou!");
+        setAnuncio(null);
+      }, 10000);
+      return () => clearTimeout(timer); // Limpa se mudar o anuncio antes
+    }
+  }, [anuncio]);
   if (anuncio) {
     // Tipamos o tipo de forma mais segura para usar no mapeamento de cores
     const tipoAnuncio = anuncio.Operacao as 'Venda' | 'Locação' | 'Captação';
@@ -77,7 +83,7 @@ export default function PainelTV() {
 
   // TELA DE DESCANSO (STANDBY com Histórico)
   return (
-    <main className="flex min-h-screen text-slate-200 bg-black ">
+    <main className="flex h-screen overflow-hidden text-slate-200 bg-black ">
       <div className="w-2/3 flex flex-col items-center bg-white justify-center">
         <h1 className="text-6xl font-extralight tracking-widest uppercase border-b-2 border-slate-700 pb-4 mb-10">
 
@@ -96,8 +102,8 @@ export default function PainelTV() {
         </p>
       </div>
 
-      <div className="w-1/3 border-l border-slate-700 bg-slate-900 p-10">
-        <h2 className="text-2xl font-bold mb-6 text-indigo-400">Histórico de Conquistas</h2>
+      <div className="w-1/3 border-l border-slate-700 bg-slate-900 p-10 ">
+        <h2 className="text-2xl  font-bold mb-6 text-indigo-400">Histórico de Conquistas</h2>
         <ul className="space-y-4">
           {historico.map((evento: any) => {
             const eventoOperacao = evento.Operacao as 'Venda' | 'Locação' | 'Captação';
@@ -106,7 +112,7 @@ export default function PainelTV() {
             return (
               <li
                 key={evento.ID} // Usa o ID do DB como chave
-                className={`p-4 bg-slate-800 rounded-lg shadow-lg border-l-4 ${cor.border} hover:bg-slate-700 transition-colors`}
+                className={`px-4 py-2 mr-5 bg-slate-800 rounded-lg shadow-lg border-l-4 ${cor.border} hover:bg-slate-700 transition-colors`}
               >
                 <span className={`text-xs font-bold uppercase ${cor.text}`}>{evento.Operacao}</span>
                 <p className="text-lg font-semibold text-white truncate">{evento.Titulo}</p>
