@@ -9,15 +9,17 @@ interface eventosDados {
 
 
 export async function POST(request: Request) {
-    const data:eventosDados =  await request.json();
+    const data: eventosDados = await request.json();
     if (!data) {
         return NextResponse.json(
-            {message: "Dados não enviados!"},
-            {status:400},
+            { message: "Dados não enviados!" },
+            { status: 400 },
         );
     }
+    let enviar;
     try {
-        const enviar = await prisma.anuncios.create({ data :{
+        enviar = await prisma.anuncios.create({
+            data: {
                 Titulo: data.titulo,
                 Corretor: data.corretor,
                 Operacao: data.operacao,
@@ -27,10 +29,14 @@ export async function POST(request: Request) {
         console.error("Problema ao Registrar no Banco: ", e);
     }
     return NextResponse.json(
-        {message: "Anúncio Registrado!"},
-        {status:200},
+        {
+            message: "Anúncio Registrado!",
+            success: true,
+            evento: enviar
+        },
+        { status: 200 },
     );
 
-    
+
 
 }

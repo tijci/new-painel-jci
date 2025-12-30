@@ -1,8 +1,8 @@
 
-'use client'; 
+'use client';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-
+import { io } from "socket.io-client";
 
 const colorMap = {
   'Venda': { bg: 'bg-green-600', text: 'text-green-200', border: 'border-green-500' },
@@ -11,38 +11,47 @@ const colorMap = {
 };
 
 export default function PainelTV() {
+  const [anuncio, setAnuncio] = useState<any>(null);
 
-  const [anuncio, setAnuncio] =  useState();
-  const verificarVendas = async () => {
-    try {
-    } catch (error) {
+  useEffect(() => {
+    const socket = io();
+    socket.on("exibir_anuncio", (data) => {
+      console.log("Recebi dados: ", data);
+      setAnuncio(data);
+      console.log(anuncio.Operacao);
+      setTimeout(() => {
+        setAnuncio(null);
+      }, 30000);
+    });
 
+    return () => {
+      socket.disconnect();
     }
-  };
+  })
 
   if (anuncio) {
     // Tipamos o tipo de forma mais segura para usar no mapeamento de cores
-    const tipoAnuncio = anuncio.operacao as 'Venda' | 'Locação' | 'Captação';
+    const tipoAnuncio = anuncio.Operacao as 'Venda' | 'Locação' | 'Captação';
     const cor = colorMap[tipoAnuncio];
-    
+
     return (
       // Uso de classes dinâmicas do Tailwind com Template Literals
       <main className={`flex flex-col items-center justify-center h-screen ${cor.bg} text-white overflow-hidden relative transition-colors duration-500`}>
-        
-        {/* Efeitos visuais */}
+
+
         <div className="absolute inset-0 bg-black/10 animate-pulse" />
 
         <div className="z-10 text-center space-y-8 p-16 bg-black/30 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/50 animate-in fade-in zoom-in duration-500">
           <h1 className="text-8xl font-black tracking-tighter drop-shadow-lg uppercase">
-            🎉 {anuncio.operacao.toUpperCase()} REALIZADA! 🎉
+            🎉 {anuncio.Operacao.toUpperCase()} REALIZADA! 🎉
           </h1>
-          
+
           <div className="space-y-4">
             <h2 className="text-5xl font-bold text-yellow-300">
-              {anuncio.titulo}
+              {anuncio.Titulo}
             </h2>
             <p className="text-3xl opacity-90 font-mono">
-              Parabéns ao corretor: <span className="font-extrabold text-white">{anuncio.corretor}</span>
+              Parabéns ao corretor: <span className="font-extrabold text-white">{anuncio.Corretor}</span>
             </p>
           </div>
         </div>
@@ -62,7 +71,7 @@ export default function PainelTV() {
           alt="Imagem de espera"
           width={700}
           height={400}
-          className=""  
+          className=""
         />
         <p className="text-xl font-mono text-black opacity-50">
           Aguardando a próxima grande conquista...
@@ -73,7 +82,7 @@ export default function PainelTV() {
 
       <div className="w-1/3 border-l border-slate-700 bg-slate-900 p-10">
         <h2 className="text-2xl font-bold mb-6 text-indigo-400">Histórico de Conquistas</h2>
-       {/*  <ul className="space-y-4">
+        {/*  <ul className="space-y-4">
           {historico.map((evento, index) => {
             const eventoOperacao = evento.operacao as 'Venda' | 'Locação' | 'Captação';
             const cor = colorMap[eventoOperacao] || colorMap.Venda;
