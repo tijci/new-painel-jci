@@ -21,7 +21,6 @@ app.prepare().then(() => {
     const io = new Server(httpServer);
 
     io.on("connection", (socket) => {
-        console.log("Alguem se conectou: ", socket.id);
         socket.on("novo anuncio", (dadosDoAnuncio) => {
             io.emit("exibir_anuncio", dadosDoAnuncio);
         });

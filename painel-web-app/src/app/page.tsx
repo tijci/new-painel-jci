@@ -17,7 +17,6 @@ export default function PainelTV() {
   useEffect(() => {
     const socket = io();
     socket.on("exibir_anuncio", (data) => {
-      console.log("Recebi dados: ", data);
       setAnuncio(data);
 
     });
@@ -29,7 +28,6 @@ export default function PainelTV() {
 
         if (json.success) {
           setHistorico(json.dados);
-          console.log(historico);
         }
 
       } catch (e) {
@@ -43,9 +41,7 @@ export default function PainelTV() {
   }, [])
   useEffect(() => {
     if (anuncio) {
-      console.log("Anuncio exibido, iniciando timer de 10s...");
       const timer = setTimeout(() => {
-        console.log("Timer acabou!");
         setAnuncio(null);
       }, 10000);
       return () => clearTimeout(timer); // Limpa se mudar o anuncio antes
