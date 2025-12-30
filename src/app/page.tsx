@@ -12,22 +12,38 @@ const colorMap = {
 
 export default function PainelTV() {
   const [anuncio, setAnuncio] = useState<any>(null);
+  const [historico, setHistorico] = useState([]);
 
   useEffect(() => {
     const socket = io();
     socket.on("exibir_anuncio", (data) => {
       console.log("Recebi dados: ", data);
       setAnuncio(data);
-      console.log(anuncio.Operacao);
       setTimeout(() => {
+        console.log("Timer acabou")
         setAnuncio(null);
-      }, 30000);
+      }, 10000);
     });
 
+    const carregarHistorico = async () => {
+      try {
+        const res = await fetch("/api/ultimos-anuncios");
+        const json = await res.json();
+
+        if (json.success) {
+          setHistorico(json.dados);
+          console.log(historico);
+        }
+
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    carregarHistorico();
     return () => {
       socket.disconnect();
     }
-  })
+  }, [])
 
   if (anuncio) {
     // Tipamos o tipo de forma mais segura para usar no mapeamento de cores
@@ -82,27 +98,27 @@ export default function PainelTV() {
 
       <div className="w-1/3 border-l border-slate-700 bg-slate-900 p-10">
         <h2 className="text-2xl font-bold mb-6 text-indigo-400">Histórico de Conquistas</h2>
-        {/*  <ul className="space-y-4">
-          {historico.map((evento, index) => {
-            const eventoOperacao = evento.operacao as 'Venda' | 'Locação' | 'Captação';
+        <ul className="space-y-4">
+          {historico.map((evento: any) => {
+            const eventoOperacao = evento.Operacao as 'Venda' | 'Locação' | 'Captação';
             const cor = colorMap[eventoOperacao] || colorMap.Venda;
-            
+
             return (
-              <li 
-                key={evento.id} // Usa o ID do DB como chave
+              <li
+                key={evento.ID} // Usa o ID do DB como chave
                 className={`p-4 bg-slate-800 rounded-lg shadow-lg border-l-4 ${cor.border} hover:bg-slate-700 transition-colors`}
               >
-                <span className={`text-xs font-bold uppercase ${cor.text}`}>{evento.operacao}</span>
-                <p className="text-lg font-semibold text-white truncate">{evento.titulo}</p>
-                <p className="text-sm text-slate-400">Por: {evento.corretor}</p>
+                <span className={`text-xs font-bold uppercase ${cor.text}`}>{evento.Operacao}</span>
+                <p className="text-lg font-semibold text-white truncate">{evento.Titulo}</p>
+                <p className="text-sm text-slate-400">Por: {evento.Corretor}</p>
                 <p className="text-xs text-slate-500">
-                  {new Date(evento.timestamp).toLocaleTimeString('pt-BR')}
+                  {new Date(evento.DataHora).toLocaleTimeString('pt-BR')}
                 </p>
               </li>
             );
           })}
         </ul>
-        {historico.length === 0 && <p className="text-slate-500 text-center mt-10">Nenhum registro encontrado.</p>} */}
+        {historico.length === 0 && <p className="text-slate-500 text-center mt-10">Nenhum registro encontrado.</p>}
       </div>
     </main>
   );
