@@ -1,0 +1,8 @@
+-- CreateTable
+CREATE TABLE "comunicados" (
+    "ID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "Assunto" TEXT NOT NULL,
+    "Mensagem" TEXT NOT NULL,
+    "Prioridade" TEXT NOT NULL,
+    "DataHora" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

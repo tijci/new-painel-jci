@@ -14,3 +14,11 @@ model anuncios {
   Operacao String
   DataHora DateTime @default(now())
 }
+
+model comunicados {
+  ID Int @id @default(autoincrement())
+  Assunto String
+  Mensagem String
+  Prioridade String
+  DataHora DateTime @default(now())
+}

@@ -1,23 +1,29 @@
-import { ReactFormState } from "react-dom/client";
+"use client";
 import { BsFillMegaphoneFill } from "react-icons/bs";
-import { useState, useEffect } from "react";
+import { BsPersonFill } from "react-icons/bs";
+
+import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
 interface FormData {
-    assunto: string,
-    mensagem: string,
-    prioridade: string,
+    titulo: string,
+    corretor: string,
+    operacao: string,
 }
 
-export default function Comunicados() {
-    const [form, setForm] = useState<FormData>({ assunto: '', mensagem: '', prioridade: 'normal' })
+
+export default function NovoAnuncio() {
+    const [form, setForm] = useState<FormData>({ titulo: '', corretor: '', operacao: 'Venda' });
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [message, setMessage] = useState('');
+
+
     const [socket, setSocket] = useState<any>(undefined);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value } as FormData);
-    }
+    };
+
     useEffect(() => {
         const socketInstance = io();
         setSocket(socketInstance);
@@ -27,73 +33,95 @@ export default function Comunicados() {
     }, []);
 
 
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setStatus('loading');
         setMessage('');
+
         try {
-            const req = await fetch('/api/novo-comunicado', {
+            const res = await fetch('/api/novo-anuncio', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(form),
-            })
-            const res = await req.json();
-            console.log(res);
-            if (res.success) {
-                socket.emit("novo comunicado", res.comunicado);
+            });
+
+            const data = await res.json();
+            console.log(data);
+            if (data.success) {
+                socket.emit("novo anuncio", data.evento);
                 setStatus('success');
-                setMessage(`Sucesso! Aviso enviado para os painéis da imobiliária!`);
-                setForm({ assunto: '', mensagem: '', prioridade: 'normal' });
+                setMessage(`Sucesso! ${data.evento.Operacao} de ${data.evento.Corretor} ativada no painel!`);
+                setForm({ titulo: '', corretor: '', operacao: 'Venda' });
             } else {
                 setStatus('error');
-                setMessage(res.message || 'Erro ao processar a requisição!')
+                setMessage(data.message || 'Erro ao processar a requisição.');
             }
-        } catch (erro) {
+        } catch (error) {
             setStatus('error');
             setMessage('Erro interno');
         } finally {
             setTimeout(() => setStatus('idle'), 5000);
         }
-    }
+    };
+
+
 
 
     return (
         <div className="flex flex-col w-full bg-gray-100 max-w-xl rounded-2xl m-10 shadow-lg">
             <div className="bg-gray-200 p-5 rounded-t-2xl">
                 <div className="flex items-center gap-2">
-                    <BsFillMegaphoneFill color="#2B7FFF" />
+                    <BsFillMegaphoneFill color="#00C950" />
 
-                    <h1 className="text-xl font-bold text-blue-500">Comunicados Internos</h1>
+                    <h1 className="text-xl font-bold text-green-500">Nova Conquista!</h1>
                 </div>
-                <p className="text-sm">Envie avisos para toda a Imobiliária!</p>
+                <p className="text-sm">Avise a nova conquista para toda a Imobiliária!</p>
             </div>
             <div className="px-5 py-5 rounded-b-2xl">
                 <form className="flex flex-col gap-1" onSubmit={handleSubmit}>
-                    <label htmlFor="">Assunto do Comunicado</label>
+                    <label htmlFor="">Título da Conquista</label>
                     <input type="text"
-                        name="assunto"
-                        value={form.assunto}
+                        name="titulo"
+                        value={form.titulo}
                         onChange={handleChange}
                         required
-                        placeholder="Ex: Reunião Geral no Auditório!" className="border rounded-sm px-4 py-2 border-gray-500 " />
-                    <label htmlFor="">Mensagem</label>
+                        placeholder="Ex: Casa de 3.500.000 vendido!"
+                        className="border rounded-sm px-4 py-2 border-gray-500 "
+                    />
+                    <label htmlFor="">Corretor</label>
                     <input type="text"
-                        name="mensagem"
-                        value={form.mensagem}
+                        name="corretor"
+                        value={form.corretor}
                         onChange={handleChange}
                         required
-                        placeholder="Ex: Todos estão convocados para uma reunião geral!" className="border rounded-sm px-4 py-2 border-gray-500 " />
-                    <label htmlFor="">Prioridade</label>
-                    <select name="prioridade" id=""
+                        placeholder="Ex: João da Silva"
+                        className="border rounded-sm px-4 py-2 border-gray-500 "
+                    />
+                    <label htmlFor="">Operação</label>
+                    <select
+                        name="operacao"
+                        value={form.operacao}
                         onChange={handleChange}
-                        value={form.prioridade}
                         required
                         className="border rounded-sm px-4 py-2 border-gray-500 ">
-                        <option value="normal">Normal</option>
-                        <option value="alta">Alta</option>
-                        <option value="muitoAlta">Muito Alta</option>
+                        <option value="venda">Venda</option>
+                        <option value="locacao">Locação</option>
+                        <option value="captação">Captação</option>
                     </select>
-                    <button className="bg-blue-500 py-2 h-18 px-5 rounded-lg my-5  hover:cursor-pointer text-white hover:scale-101 transition-all hover:bg-blue-600">Publicar Comunicado!</button>
+                    <button
+                        type="submit"
+                        disabled={status === 'loading'}
+                        className={`w-full py-3 h-18 my-5 px-4 rounded-lg text-white font-semibold transition duration-300 ${status === 'loading'
+                            ? 'bg-gray-400 cursor-not-allowed'
+                            : 'bg-green-500 hover:bg-green-600'
+                            }`}
+                    >
+                        {/* Altera o texto do botão conforme o estado */}
+                        {status === 'loading' ? 'Publicando...' : 'Publicar Anúncio!'}
+                    </button>
+
+
                 </form>
                 {status === 'success' &&
                     <div className="border rounded-lg w-3/4 bg-green-100 flex flex-col justify-center items-start px-4 py-2 max-w-sm mx-auto border-green-700">
