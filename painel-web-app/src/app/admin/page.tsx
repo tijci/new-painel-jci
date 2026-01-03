@@ -1,7 +1,6 @@
 "use client";
 
-import Comunicados from "@/src/components/admin/Comunicados";
-import NovaConquista from "@/src/components/admin/NovaConquista";
+import NovoComunicado from "@/src/components/admin/NovoComunicado";
 import NovoAnuncio from "@/src/components/admin/NovoAnuncio";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
@@ -81,7 +80,7 @@ export default function Admin() {
 
       <div className="flex flex-col lg:flex-row lg:gap-10 w-full justify-center items-center h-auto">
         <NovoAnuncio />
-        <Comunicados />
+        <NovoComunicado />
       </div>
     </div>
   );

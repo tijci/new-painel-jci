@@ -27,6 +27,10 @@ export async function POST(request: Request) {
         });
     } catch (e) {
         console.error("Problema ao Registrar no Banco: ", e);
+        return NextResponse.json(
+            { message: "Erro interno ao salvar comunicado." },
+            { status: 500 }
+        );
     }
     return NextResponse.json(
         {

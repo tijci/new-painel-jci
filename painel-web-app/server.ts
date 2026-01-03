@@ -21,9 +21,17 @@ app.prepare().then(() => {
     const io = new Server(httpServer);
 
     io.on("connection", (socket) => {
+        console.log(`🔌 Cliente conectado: ${socket.id}`);
         socket.on("novo anuncio", (dadosDoAnuncio) => {
+            // Log para confirmar recebimento
+            console.log("📢 Evento 'novo anuncio' recebido:", dadosDoAnuncio);
             io.emit("exibir_anuncio", dadosDoAnuncio);
         });
+        socket.on("novo comunicado", (dadosDoComunicado) => {
+            // Log para confirmar recebimento
+            console.log("🔔 Evento 'novo comunicado' recebido:", dadosDoComunicado);
+            io.emit("exibir_comunicado", dadosDoComunicado);
+        })
     });
 
     httpServer.listen(port, () => {

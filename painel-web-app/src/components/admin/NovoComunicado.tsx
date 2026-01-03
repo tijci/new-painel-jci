@@ -9,7 +9,7 @@ interface FormData {
     prioridade: string,
 }
 
-export default function Comunicados() {
+export default function NovoComunicado() {
     const [form, setForm] = useState<FormData>({ assunto: '', mensagem: '', prioridade: 'normal' })
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [message, setMessage] = useState('');

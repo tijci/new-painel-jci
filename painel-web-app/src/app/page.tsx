@@ -11,14 +11,22 @@ const colorMap = {
 };
 
 export default function PainelTV() {
+  const [comunicado, setComunicado] = useState<any>(null);
   const [anuncio, setAnuncio] = useState<any>(null);
   const [historico, setHistorico] = useState([]);
 
   useEffect(() => {
     const socket = io();
+    socket.on("connect", () => {
+      console.log("🟢 TV Conectada ao Servidor! ID:", socket.id);
+    });
     socket.on("exibir_anuncio", (data) => {
+      console.log("📺 TV recebeu ANÚNCIO:", data); // Veremos isso no F12
       setAnuncio(data);
-
+    });
+    socket.on("exibir_comunicado", (data) => {
+      console.log("📺 TV recebeu COMUNICADO:", data); // Veremos isso no F12
+      setComunicado(data);
     });
 
     const carregarHistorico = async () => {
@@ -39,6 +47,7 @@ export default function PainelTV() {
       socket.disconnect();
     }
   }, [])
+
   useEffect(() => {
     if (anuncio) {
       const timer = setTimeout(() => {
@@ -47,6 +56,16 @@ export default function PainelTV() {
       return () => clearTimeout(timer); // Limpa se mudar o anuncio antes
     }
   }, [anuncio]);
+
+  useEffect(() => {
+    if (comunicado) {
+      const timer = setTimeout(() => {
+        setComunicado(null);
+      }, 10000);
+      return () => clearTimeout(timer); // Limpa se mudar o comunicado antes
+    }
+  }, [comunicado]);
+
   if (anuncio) {
     // Tipamos o tipo de forma mais segura para usar no mapeamento de cores
     const tipoAnuncio = anuncio.Operacao as 'Venda' | 'Locação' | 'Captação';
@@ -75,6 +94,25 @@ export default function PainelTV() {
         </div>
       </main>
     );
+  }
+
+  if (comunicado) {
+    const prioridadeMap: any = {
+      'normal': 'bg-blue-600',
+      'alta': 'bg-orange-600',
+      'muitoAlta': 'bg-red-600 animate-pulse'
+    };
+    const bgClass = prioridadeMap[comunicado.Prioridade] || 'bg-blue-600';
+
+    return (
+      <main className={`flex flex-col items-center justify-center h-screen ${bgClass} text-white p-20 text-center`}>
+        <h1 className="text-6xl font-black mb-10 border-b-4 border-white pb-4">{comunicado.Assunto}</h1>
+        <p className="text-4xl font-medium leading-relaxed">{comunicado.Mensagem}</p>
+        <div className="absolute bottom-10 text-white/50 text-xl font-mono">
+          ⚠️ Comunicado Oficial
+        </div>
+      </main>
+    )
   }
 
   // TELA DE DESCANSO (STANDBY com Histórico)
