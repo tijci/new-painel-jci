@@ -47,7 +47,6 @@ export default function NovoAnuncio() {
             });
 
             const data = await res.json();
-            console.log(data);
             if (data.success) {
                 socket.emit("novo anuncio", data.evento);
                 setStatus('success');
@@ -105,9 +104,9 @@ export default function NovoAnuncio() {
                         onChange={handleChange}
                         required
                         className="border rounded-sm px-4 py-2 border-gray-500 ">
-                        <option value="venda">Venda</option>
-                        <option value="locacao">Locação</option>
-                        <option value="captação">Captação</option>
+                        <option value="Venda">Venda</option>
+                        <option value="Locação">Locação</option>
+                        <option value="Captação">Captação</option>
                     </select>
                     <button
                         type="submit"

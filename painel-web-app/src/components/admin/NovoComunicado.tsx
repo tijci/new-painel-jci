@@ -38,7 +38,6 @@ export default function NovoComunicado() {
                 body: JSON.stringify(form),
             })
             const res = await req.json();
-            console.log(res);
             if (res.success) {
                 socket.emit("novo comunicado", res.comunicado);
                 setStatus('success');

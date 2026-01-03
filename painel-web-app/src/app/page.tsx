@@ -4,16 +4,47 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { io } from "socket.io-client";
 
+interface ItemFila {
+  id: string,
+  tipo: 'anuncio' | 'comunicado',
+  payload: any,
+}
+
 const colorMap = {
   'Venda': { bg: 'bg-green-600', text: 'text-green-200', border: 'border-green-500' },
   'Locação': { bg: 'bg-blue-600', text: 'text-blue-200', border: 'border-blue-500' },
   'Captação': { bg: 'bg-yellow-600', text: 'text-yellow-200', border: 'border-yellow-500' },
 };
 
+
 export default function PainelTV() {
   const [comunicado, setComunicado] = useState<any>(null);
   const [anuncio, setAnuncio] = useState<any>(null);
-  const [historico, setHistorico] = useState([]);
+  const [historico, setHistorico] = useState<any[]>([]);
+
+  const [itemAtual, setItemAtual] = useState<ItemFila | null>(null);
+  const [fila, setFila] = useState<ItemFila[]>([]);
+
+  useEffect(() => {
+    if (itemAtual || fila.length === 0) return;
+
+    const proximoItem = fila[0];
+
+    setItemAtual(proximoItem);
+    setFila((prev) => prev.slice(1));
+
+  }, [itemAtual, fila]);
+
+  useEffect(() => {
+    if (!itemAtual) return;
+
+    const tempoExibicao = 10000;
+    const timer = setTimeout(() => {
+      setItemAtual(null);
+    }, tempoExibicao);
+
+    return () => clearTimeout(timer);
+  }, [itemAtual]);
 
   useEffect(() => {
     const socket = io();
@@ -21,11 +52,20 @@ export default function PainelTV() {
       console.log("🟢 TV Conectada ao Servidor! ID:", socket.id);
     });
     socket.on("exibir_anuncio", (data) => {
-      console.log("📺 TV recebeu ANÚNCIO:", data); // Veremos isso no F12
+      setFila((prev) => [...prev, { id: crypto.randomUUID(), tipo: 'anuncio', payload: data }]);
       setAnuncio(data);
+
+      setHistorico((prev: any) => {
+        const novoItem = {
+          ...data,
+          DataHora: data.DataHora || new Date().toISOString(), // Garante que tenha data
+          ID: data.ID || crypto.randomUUID() // Garante ID para a key do React
+        };
+        return [novoItem, ...prev].slice(0, 5);
+      });
     });
     socket.on("exibir_comunicado", (data) => {
-      console.log("📺 TV recebeu COMUNICADO:", data); // Veremos isso no F12
+      setFila((prev) => [...prev, { id: crypto.randomUUID(), tipo: 'comunicado', payload: data }]);
       setComunicado(data);
     });
 
@@ -66,56 +106,60 @@ export default function PainelTV() {
     }
   }, [comunicado]);
 
-  if (anuncio) {
-    // Tipamos o tipo de forma mais segura para usar no mapeamento de cores
-    const tipoAnuncio = anuncio.Operacao as 'Venda' | 'Locação' | 'Captação';
-    const cor = colorMap[tipoAnuncio];
-
-    return (
-      // Uso de classes dinâmicas do Tailwind com Template Literals
-      <main className={`flex flex-col items-center justify-center h-screen ${cor.bg} text-white overflow-hidden relative transition-colors duration-500`}>
 
 
-        <div className="absolute inset-0 bg-black/10 animate-pulse" />
+  if (itemAtual) {
+    if (itemAtual.tipo == 'anuncio') {
+      const anuncio = itemAtual.payload;
+      const tipoAnuncio = anuncio.Operacao as 'Venda' | 'Locação' | 'Captação';
+      const cor = colorMap[tipoAnuncio];
+      return (
+        // Uso de classes dinâmicas do Tailwind com Template Literals
+        <main className={`flex flex-col items-center justify-center h-screen ${cor.bg} text-white overflow-hidden relative transition-colors duration-500`}>
 
-        <div className="z-10 text-center space-y-8 p-16 bg-black/30 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/50 animate-in fade-in zoom-in duration-500">
-          <h1 className="text-8xl font-black tracking-tighter drop-shadow-lg uppercase">
-            🎉 {anuncio.Operacao.toUpperCase()} REALIZADA! 🎉
-          </h1>
 
-          <div className="space-y-4">
-            <h2 className="text-5xl font-bold text-yellow-300">
-              {anuncio.Titulo}
-            </h2>
-            <p className="text-3xl opacity-90 font-mono">
-              Parabéns ao corretor: <span className="font-extrabold text-white">{anuncio.Corretor}</span>
-            </p>
+          <div className="absolute inset-0 bg-black/10 animate-pulse" />
+
+          <div className="z-10 text-center space-y-8 p-16 bg-black/30 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/50 animate-in fade-in zoom-in duration-500">
+            <h1 className="text-8xl font-black tracking-tighter drop-shadow-lg uppercase">
+              🎉 {anuncio.Operacao.toUpperCase()} REALIZADA! 🎉
+            </h1>
+
+            <div className="space-y-4">
+              <h2 className="text-5xl font-bold text-yellow-300">
+                {anuncio.Titulo}
+              </h2>
+              <p className="text-3xl opacity-90 font-mono">
+                Parabéns ao corretor: <span className="font-extrabold text-white">{anuncio.Corretor}</span>
+              </p>
+            </div>
           </div>
-        </div>
-      </main>
-    );
+        </main>
+      );
+    }
+    if (itemAtual.tipo == 'comunicado') {
+      const comunicado = itemAtual.payload;
+      const prioridadeMap: any = {
+        'normal': 'bg-blue-600',
+        'alta': 'bg-orange-600',
+        'muitoAlta': 'bg-red-600 animate-pulse'
+      };
+      const bgClass = prioridadeMap[comunicado.Prioridade] || 'bg-blue-600';
+
+      return (
+        <main className={`flex flex-col items-center justify-center h-screen ${bgClass} text-white p-20 text-center`}>
+          <h1 className="text-6xl font-black mb-10 border-b-4 border-white pb-4">{comunicado.Assunto}</h1>
+          <p className="text-4xl font-medium leading-relaxed">{comunicado.Mensagem}</p>
+          <div className="absolute bottom-10 text-white/50 text-xl font-mono">
+            ⚠️ Comunicado Oficial
+          </div>
+        </main>
+      )
+    }
+
   }
 
-  if (comunicado) {
-    const prioridadeMap: any = {
-      'normal': 'bg-blue-600',
-      'alta': 'bg-orange-600',
-      'muitoAlta': 'bg-red-600 animate-pulse'
-    };
-    const bgClass = prioridadeMap[comunicado.Prioridade] || 'bg-blue-600';
 
-    return (
-      <main className={`flex flex-col items-center justify-center h-screen ${bgClass} text-white p-20 text-center`}>
-        <h1 className="text-6xl font-black mb-10 border-b-4 border-white pb-4">{comunicado.Assunto}</h1>
-        <p className="text-4xl font-medium leading-relaxed">{comunicado.Mensagem}</p>
-        <div className="absolute bottom-10 text-white/50 text-xl font-mono">
-          ⚠️ Comunicado Oficial
-        </div>
-      </main>
-    )
-  }
-
-  // TELA DE DESCANSO (STANDBY com Histórico)
   return (
     <main className="flex h-screen overflow-hidden text-slate-200 bg-black ">
       <div className="w-2/3 flex flex-col items-center bg-white justify-center">
