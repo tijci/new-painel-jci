@@ -101,6 +101,7 @@ export default function PainelTV() {
     if (comunicado) {
       const timer = setTimeout(() => {
         setComunicado(null);
+
       }, 10000);
       return () => clearTimeout(timer); // Limpa se mudar o comunicado antes
     }
@@ -115,25 +116,20 @@ export default function PainelTV() {
       const cor = colorMap[tipoAnuncio];
       return (
         // Uso de classes dinâmicas do Tailwind com Template Literals
-        <main className={`flex flex-col items-center justify-center h-screen ${cor.bg} text-white overflow-hidden relative transition-colors duration-500`}>
 
+        <main className={`flex flex-col items-center justify-center h-screen bg-white text-white overflow-hidden relative transition-colors duration-500`}>
 
+          <Image
+            src={anuncio.BannerUrl}
+            alt="Banner"
+            width={1920}
+            height={1080}
+            priority // Força o carregamento imediato da imagem
+            className="object-contain" // Garante que a imagem se ajuste bem
+          />
           <div className="absolute inset-0 bg-black/10 animate-pulse" />
 
-          <div className="z-10 text-center space-y-8 p-16 bg-black/30 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/50 animate-in fade-in zoom-in duration-500">
-            <h1 className="text-8xl font-black tracking-tighter drop-shadow-lg uppercase">
-              🎉 {anuncio.Operacao.toUpperCase()} REALIZADA! 🎉
-            </h1>
 
-            <div className="space-y-4">
-              <h2 className="text-5xl font-bold text-yellow-300">
-                {anuncio.Titulo}
-              </h2>
-              <p className="text-3xl opacity-90 font-mono">
-                Parabéns ao corretor: <span className="font-extrabold text-white">{anuncio.Corretor}</span>
-              </p>
-            </div>
-          </div>
         </main>
       );
     }
@@ -147,13 +143,23 @@ export default function PainelTV() {
       const bgClass = prioridadeMap[comunicado.Prioridade] || 'bg-blue-600';
 
       return (
-        <main className={`flex flex-col items-center justify-center h-screen ${bgClass} text-white p-20 text-center`}>
-          <h1 className="text-6xl font-black mb-10 border-b-4 border-white pb-4">{comunicado.Assunto}</h1>
-          <p className="text-4xl font-medium leading-relaxed">{comunicado.Mensagem}</p>
-          <div className="absolute bottom-10 text-white/50 text-xl font-mono">
-            ⚠️ Comunicado Oficial
-          </div>
-        </main>
+        <div className={`flex flex-col items-center justify-start h-screen ${bgClass}  `}>
+          <Image
+            src="/logo-branca.webp"
+            alt="Logo branca"
+            width={300}
+            height={300}
+            className="my-20"
+          />
+          <main className={`flex flex-col items-center justify-center  text-white p-20 text-center`}>
+            <h1 className="text-6xl font-black mb-10 border-b-4 border-white pb-4">{comunicado.Assunto}</h1>
+            <p className="text-4xl font-medium leading-relaxed">{comunicado.Mensagem}</p>
+            <div className="absolute bottom-10 text-white/50 text-xl font-mono">
+              ⚠️ Comunicado Oficial
+            </div>
+          </main>
+        </div>
+
       )
     }
 

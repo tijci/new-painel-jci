@@ -8,17 +8,24 @@ datasource db {
 }
 
 model anuncios {
-  ID Int @id @default(autoincrement())
-  Titulo String
+  ID       Int      @id @default(autoincrement())
+  Titulo   String
   Corretor String
   Operacao String
   DataHora DateTime @default(now())
 }
 
 model comunicados {
-  ID Int @id @default(autoincrement())
-  Assunto String
-  Mensagem String
+  ID         Int      @id @default(autoincrement())
+  Assunto    String
+  Mensagem   String
   Prioridade String
-  DataHora DateTime @default(now())
+  DataHora   DateTime @default(now())
+}
+
+model corretor {
+  ID        Int    @id @default(autoincrement())
+  Nome      String
+  BannerUrl String
+  Operacao  String
 }

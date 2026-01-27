@@ -1,73 +1,24 @@
 "use client";
 import { BsFillMegaphoneFill } from "react-icons/bs";
-import { BsPersonFill } from "react-icons/bs";
-
-import { useEffect, useState } from "react";
-import { io } from "socket.io-client";
+import { useState } from "react";
 
 interface FormData {
-    titulo: string,
-    corretor: string,
+    nome: string,
     operacao: string,
-    bannerUrl: string,
-}
-
-interface Corretor {
-    ID: number;
-    Nome: string;
-    Operacao: string;
-    BannerUrl: string;
+    banner: string,
 }
 
 
-export default function NovoAnuncio() {
-    const [form, setForm] = useState<FormData>({ titulo: '', corretor: '', operacao: 'Venda', bannerUrl: '' });
+export default function NovoCorretor() {
+    const [form, setForm] = useState<FormData>({ nome: '', operacao: '', banner: '' });
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [message, setMessage] = useState('');
-    const [listaCorretores, setListaCorretores] = useState<Corretor[]>([]);
 
-    const [socket, setSocket] = useState<any>(undefined);
+
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value } as FormData);
     };
-
-    useEffect(() => {
-        const socketInstance = io();
-        setSocket(socketInstance);
-        return () => {
-            socketInstance.disconnect();
-        }
-    }, []);
-
-
-    useEffect(() => {
-        async function carregarCorretores() {
-            const resposta = await fetch('/api/corretores');
-            const lista = await resposta.json();
-            setListaCorretores(lista);
-        }
-        carregarCorretores();
-    }, [])
-
-
-    const handleChangeCorretor = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const nomeSelecionado = e.target.value;
-        const corretorEncontrado = listaCorretores.find(c => c.Nome === nomeSelecionado);
-
-        if (corretorEncontrado) {
-            setForm({
-                ...form,
-                corretor: corretorEncontrado.Nome,
-                operacao: corretorEncontrado.Operacao,
-                bannerUrl: corretorEncontrado.BannerUrl,
-            });
-        } else {
-            setForm({ ...form, corretor: nomeSelecionado });
-        }
-
-    }
-
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -75,18 +26,17 @@ export default function NovoAnuncio() {
         setMessage('');
 
         try {
-            const res = await fetch('/api/novo-anuncio', {
+            const res = await fetch('/api/corretores', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(form),
             });
 
             const data = await res.json();
-            if (data.success) {
-                socket.emit("novo anuncio", { ...data.evento, BannerUrl: form.bannerUrl });
+            if (data.success === true) {
                 setStatus('success');
-                setMessage('Conquista publicada com sucesso!');
-                setForm({ titulo: '', corretor: '', operacao: 'Venda', bannerUrl: '' });
+                setMessage(`Corretor criado com sucesso!`);
+                setForm({ nome: '', operacao: 'Venda', banner: '' });
             } else {
                 setStatus('error');
                 setMessage(data.message || 'Erro ao processar a requisição.');
@@ -108,36 +58,30 @@ export default function NovoAnuncio() {
                 <div className="flex items-center gap-2">
                     <BsFillMegaphoneFill color="#00C950" />
 
-                    <h1 className="text-xl font-bold text-green-500">Nova Conquista!</h1>
+                    <h1 className="text-xl font-bold text-green-500">Cadastrar Novo Corretor!</h1>
                 </div>
-                <p className="text-sm">Avise a nova conquista para toda a Imobiliária!</p>
+                <p className="text-sm">Crie novos corretores para o painel!</p>
             </div>
             <div className="px-5 py-5 rounded-b-2xl">
                 <form className="flex flex-col gap-1" onSubmit={handleSubmit}>
-                    <label htmlFor="">Título da Conquista</label>
+                    <label htmlFor="">Nome do Corretor</label>
                     <input type="text"
-                        name="titulo"
-                        value={form.titulo}
+                        name="nome"
+                        value={form.nome}
                         onChange={handleChange}
                         required
-                        placeholder="Ex: Casa de 3.500.000 vendido!"
+                        placeholder="Ex: João da Silva"
                         className="border rounded-sm px-4 py-2 border-gray-500 "
                     />
-                    <label htmlFor="">Corretor</label>
-                    <select
-                        name="corretor"
-                        value={form.corretor}
-                        onChange={handleChangeCorretor}
+                    <label htmlFor="">Link do Banner</label>
+                    <input type="text"
+                        name="banner"
+                        value={form.banner}
+                        onChange={handleChange}
                         required
+                        placeholder="Ex: https://google.com"
                         className="border rounded-sm px-4 py-2 border-gray-500 "
-                    >
-                        <option value="">Selecione um corretor</option>
-                        {listaCorretores.map((c) => (
-                            <option key={c.ID} value={c.Nome}>
-                                {c.Nome}
-                            </option>
-                        ))}
-                    </select>
+                    />
                     <label htmlFor="">Operação</label>
                     <select
                         name="operacao"
@@ -145,6 +89,7 @@ export default function NovoAnuncio() {
                         onChange={handleChange}
                         required
                         className="border rounded-sm px-4 py-2 border-gray-500 ">
+                        <option value="">Selecione a Operação...</option>
                         <option value="Venda">Venda</option>
                         <option value="Locação">Locação</option>
                         <option value="Captação">Captação</option>
@@ -158,7 +103,7 @@ export default function NovoAnuncio() {
                             }`}
                     >
                         {/* Altera o texto do botão conforme o estado */}
-                        {status === 'loading' ? 'Publicando...' : 'Publicar Anúncio!'}
+                        {status === 'loading' ? 'Cadastrando...' : 'Cadastrar Corretor!'}
                     </button>
 
 

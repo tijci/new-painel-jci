@@ -4,6 +4,7 @@ import NovoComunicado from "@/src/components/admin/NovoComunicado";
 import NovoAnuncio from "@/src/components/admin/NovoAnuncio";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
+import NovoCorretor from "@/src/components/admin/NovoCorretor";
 
 
 export default function Admin() {
@@ -14,15 +15,7 @@ export default function Admin() {
   const [socket, setSocket] = useState<any>(undefined);
 
 
-  useEffect(() => {
-    async function checkAuth() {
-      const res = await fetch("api/me");
-      if (res.ok) {
-        setIsLogged(true);
-      }
-    }
-    checkAuth();
-  }, [])
+
 
   useEffect(() => {
     const socketInstance = io();
@@ -81,6 +74,7 @@ export default function Admin() {
       <div className="flex flex-col lg:flex-row lg:gap-10 w-full justify-center items-center h-auto">
         <NovoAnuncio />
         <NovoComunicado />
+        <NovoCorretor />
       </div>
     </div>
   );
