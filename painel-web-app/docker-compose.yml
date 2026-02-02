@@ -1,0 +1,14 @@
+services:
+  painel-web:
+    build: .
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./avisos.db:/app/avisos.db
+      - ./public/uploads:/app/public/uploads
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=file:./avisos.db
+    env_file:
+      - .env
