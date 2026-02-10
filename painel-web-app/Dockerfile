@@ -50,7 +50,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
+ENV HOSTNAME="192.168.15.224"
 
 # Cria usuário não-root ANTES de copiar arquivos
 RUN addgroup --system --gid 1001 nodejs
@@ -67,7 +67,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 COPY --from=builder --chown=nextjs:nodejs /app/next.config.ts ./next.config.ts
 COPY --from=builder --chown=nextjs:nodejs /app/tsconfig.json ./tsconfig.json
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
-COPY --from=builder --chown=nextjs:nodejs /app/avisos.db ./avisos.db
+RUN mkdir -p /app/db && chown -R nextjs:nodejs /app/db
 COPY --from=builder --chown=nextjs:nodejs /app/generated ./generated
 
 USER nextjs

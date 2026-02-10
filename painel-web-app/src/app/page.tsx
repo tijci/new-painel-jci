@@ -16,6 +16,13 @@ const colorMap = {
   'Captação': { bg: 'bg-yellow-600', text: 'text-yellow-200', border: 'border-yellow-500' },
 };
 
+const generateId = () => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return Math.random().toString(36).substring(2, 11);
+};
+
 
 export default function PainelTV() {
   const [comunicado, setComunicado] = useState<any>(null);
@@ -52,20 +59,20 @@ export default function PainelTV() {
       console.log("🟢 TV Conectada ao Servidor! ID:", socket.id);
     });
     socket.on("exibir_anuncio", (data) => {
-      setFila((prev) => [...prev, { id: crypto.randomUUID(), tipo: 'anuncio', payload: data }]);
+      setFila((prev) => [...prev, { id: generateId(), tipo: 'anuncio', payload: data }]);
       setAnuncio(data);
 
       setHistorico((prev: any) => {
         const novoItem = {
           ...data,
           DataHora: data.DataHora || new Date().toISOString(), // Garante que tenha data
-          ID: data.ID || crypto.randomUUID() // Garante ID para a key do React
+          ID: data.ID || generateId() // Garante ID para a key do React
         };
         return [novoItem, ...prev].slice(0, 5);
       });
     });
     socket.on("exibir_comunicado", (data) => {
-      setFila((prev) => [...prev, { id: crypto.randomUUID(), tipo: 'comunicado', payload: data }]);
+      setFila((prev) => [...prev, { id: generateId(), tipo: 'comunicado', payload: data }]);
       setComunicado(data);
     });
 

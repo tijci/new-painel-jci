@@ -9,7 +9,6 @@ node_modules
 .next
 
 # Banco de dados local - Será montado via volume, não copiado
-*.db
 
 # Arquivos de ambiente locais - Variáveis vêm do docker-compose
 .env
